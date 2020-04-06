@@ -36,7 +36,7 @@ type DirectoryEntry struct {
 	Tag         uint16 // tag id number
 	Type        uint16 // type of value
 	Count       uint32 // number of values
-	ValueOffset uint32 // offset to first value
+	ValueOffset uint32 // offset to value
 }
 
 // reads the header of a Tiff file
@@ -88,38 +88,70 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 		return tags, err
 	}
 
-	nextIFD := int64(header.IFDOffset)
-	if _, err = r.Seek(nextIFD, 0); err != nil {
+	// TODO add loop for avery IFD
+	// ends when offset is 4 bytes of 0
+
+	// offset to next IFD
+	nextIFD := header.IFDOffset
+	if _, err = r.Seek(int64(nextIFD), 0); err != nil {
 		return tags, err
 	}
 
-	var numDE uint16
-	err = binary.Read(r, header.ByteOrder, &numDE)
-	if err != nil {
-		return tags, err
-	}
-
-	fmt.Printf("header: %v\n", header)
-	fmt.Printf("offset: %v\n", header.IFDOffset)
-	fmt.Printf("num de: %v\n", numDE)
-
-	var nextDir int64
-	for i := 0; i < int(numDE); i++ {
-		var de DirectoryEntry
-		err = binary.Read(r, header.ByteOrder, &de)
+	for nextIFD != 0 {
+		// number of directory entries
+		var numDE uint16
+		err = binary.Read(r, header.ByteOrder, &numDE)
 		if err != nil {
 			return tags, err
 		}
-		nextDir, _ = r.Seek(0, io.SeekCurrent) // get current position in file
 
-		fmt.Printf("de%d: %v\n", i+1, de)
+		//fmt.Printf("header: %v\n", header)
+		//fmt.Printf("offset: %v\n", header.IFDOffset)
+		//fmt.Printf("num de: %v\n", numDE)
 
-		//if value offset is past start of file
-		if de.ValueOffset > 0 {
+		// for each data directory
+		var nextDir int64
+		for i := 0; i < int(numDE); i++ {
+			// read static parts of directory entry
+			var de DirectoryEntry
+			err = binary.Read(r, header.ByteOrder, &de)
+			if err != nil {
+				return tags, err
+			}
+
+			//fmt.Printf("de%d: %v\n", i+1, de)
+
+			// based on data type
+			// if <= 4 bytes read value, else follow pointer to value
+			var typeBytes uint32
+			switch de.Type {
+			case 1:
+				typeBytes = 1 // byte
+			case 2:
+				typeBytes = 1 // ascii
+			case 3:
+				typeBytes = 2 // short
+			case 4:
+				typeBytes = 4 // long
+			case 5:
+				typeBytes = 8 // rational
+			default:
+			}
+			typeBytes *= de.Count // bytes * number of values
+
+			if typeBytes <= 4 {
+				// set directory entry value offset to current location in file
+				offset, _ := r.Seek(0, io.SeekCurrent) // get current position in file
+				de.ValueOffset = uint32(offset) - 4    // where we are now minus size of value offset (32bits=4bytes)
+				//fmt.Printf("modified de%d: %v\n", i+1, de)
+			}
+
+			nextDir, _ = r.Seek(0, io.SeekCurrent) // get current position in file
+
 			// if tag is supported then get the value(s), otherwise skip
 			switch de.Tag {
 			case 256:
-				err = getTagValue16or32(r, &tags.ImageWidth, binary.LittleEndian, de)
+				err = getTagValue16or32(r, &tags.ImageWidth, header.ByteOrder, de)
 			case 257:
 				err = getTagValue16or32(r, &tags.ImageLength, header.ByteOrder, de)
 			case 258:
@@ -146,10 +178,16 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "warning: unable to read value for tag %d -- %s\n", de.Tag, err)
 			}
+
+			// seek to next dir
+			if _, err = r.Seek(nextDir, 0); err != nil {
+				return tags, err
+			}
 		}
 
-		// seek to next dir
-		if _, err = r.Seek(nextDir, 0); err != nil {
+		// get offset to next ifd
+		err = binary.Read(r, header.ByteOrder, &nextIFD)
+		if err != nil {
 			return tags, err
 		}
 	}
