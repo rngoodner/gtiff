@@ -80,6 +80,7 @@ func ReadHeader(r io.Reader) (Header, error) {
 	return header, nil
 }
 
+// read all tags in the tiff file and record the values of supported tags
 func ReadTags(r io.ReadSeeker) (Tags, error) {
 	var tags Tags
 
@@ -195,6 +196,7 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 	return tags, nil
 }
 
+// get value of a uint16 tag
 func getTagValue16(r io.ReadSeeker, p *uint16, byteOrder binary.ByteOrder, de DirectoryEntry) error {
 	if _, err := r.Seek(int64(de.ValueOffset), 0); err != nil {
 		return err
@@ -207,6 +209,7 @@ func getTagValue16(r io.ReadSeeker, p *uint16, byteOrder binary.ByteOrder, de Di
 	return nil
 }
 
+// get value of a uint32 tag
 func getTagValue32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de DirectoryEntry) error {
 	if _, err := r.Seek(int64(de.ValueOffset), 0); err != nil {
 		return err
@@ -219,7 +222,7 @@ func getTagValue32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de Di
 	return nil
 }
 
-// reads 16 or 32 bit uint as needed and always returns a 32 bit uint
+// reads uint16 or uint32 value depending on type specified in directory entay and always return a uint32
 func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de DirectoryEntry) error {
 	var val16 uint16
 
@@ -242,7 +245,7 @@ func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, d
 	return nil
 }
 
-// populate slice with multiple values, reads 16 or 32 bit uint and always returns 32 bit uint
+// populate slice with multiple values, reads uint16 or uint32 depending on type specified in directory entry and always returns uint32
 func getMultiTagValues16or32(r io.ReadSeeker, p *[]uint32, byteOrder binary.ByteOrder, de DirectoryEntry) error {
 	for i := 0; i < int(de.Count); i++ {
 		var newVal uint32
