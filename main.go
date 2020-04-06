@@ -139,24 +139,12 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 
 			//fmt.Printf("de%d: %v\n", i+1, de)
 
-			// based on data type
-			// if <= 4 bytes read value, else follow pointer to value
-			var typeBytes uint32
-			switch de.Type {
-			case 1:
-				typeBytes = 1 // byte
-			case 2:
-				typeBytes = 1 // ascii
-			case 3:
-				typeBytes = 2 // short
-			case 4:
-				typeBytes = 4 // long
-			case 5:
-				typeBytes = 8 // rational
-			default:
-			}
+			// data type * number of values in bytes
+			typeBytes16, _ := typeToBytes(de.Type)
+			typeBytes := uint32(typeBytes16)
 			typeBytes *= de.Count // bytes * number of values
 
+			// if <= 4 bytes read value, else follow pointer to value
 			if typeBytes <= 4 {
 				// set directory entry value offset to current location in file
 				offset, _ := r.Seek(0, io.SeekCurrent) // get current position in file
@@ -264,23 +252,47 @@ func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, d
 
 // populate slice with multiple values, reads uint16 or uint32 depending on type specified in directory entry and always returns uint32
 func getMultiTagValues16or32(r io.ReadSeeker, p *[]uint32, byteOrder binary.ByteOrder, de DirectoryEntry) error {
-	for i := 0; i < int(de.Count); i++ {
-		var newVal uint32
+	var newVal uint32
 
-		for i := 0; i < int(de.Count); i++ {
-			if err := getTagValue16or32(r, &newVal, byteOrder, de); err != nil {
-				return err
-			}
-			*p = append(*p, newVal)
+	for i := 0; i < int(de.Count); i++ {
+		if err := getTagValue16or32(r, &newVal, byteOrder, de); err != nil {
+			return err
 		}
+		*p = append(*p, newVal)
+
+		next, _ := typeToBytes(de.Type)
+		de.ValueOffset += uint32(next)
 	}
 
 	return nil
 }
 
+// contvert tiff numeric type to bytes
+func typeToBytes(t uint16) (uint16, error) {
+	// based on data type
+	// if <= 4 bytes read value, else follow pointer to value
+	var typeBytes uint16
+	var err error
+	switch t {
+	case 1:
+		typeBytes = 1 // byte
+	case 2:
+		typeBytes = 1 // ascii
+	case 3:
+		typeBytes = 2 // short
+	case 4:
+		typeBytes = 4 // long
+	case 5:
+		typeBytes = 8 // rational
+	default:
+		err = fmt.Errorf("type not supported, got %d, expected [1,5]", t)
+	}
+	return typeBytes, err
+}
+
 func main() {
 	// open tiff file
-	r, err := os.Open("cell8.tif")
+	r, err := os.Open("cell32.tif")
 	if err != nil {
 		log.Fatal(err)
 	}
