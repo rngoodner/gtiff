@@ -105,9 +105,6 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 		return tags, header, err
 	}
 
-	// TODO add loop for avery IFD
-	// ends when offset is 4 bytes of 0
-
 	// offset to next IFD
 	nextIFD := header.IFDOffset
 	if _, err = r.Seek(int64(nextIFD), 0); err != nil {
@@ -122,10 +119,6 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 			return tags, header, err
 		}
 
-		//fmt.Printf("header: %v\n", header)
-		//fmt.Printf("offset: %v\n", header.IFDOffset)
-		//fmt.Printf("num de: %v\n", numDE)
-
 		// for each data directory
 		var nextDir int64
 		for i := 0; i < int(numDE); i++ {
@@ -135,8 +128,6 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 			if err != nil {
 				return tags, header, err
 			}
-
-			//fmt.Printf("de%d: %v\n", i+1, de)
 
 			// data type * number of values in bytes
 			typeBytes16, _ := typeToBytes(de.Type)
@@ -148,7 +139,6 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 				// set directory entry value offset to current location in file
 				offset, _ := r.Seek(0, io.SeekCurrent) // get current position in file
 				de.ValueOffset = uint32(offset) - 4    // where we are now minus size of value offset (32bits=4bytes)
-				//fmt.Printf("modified de%d: %v\n", i+1, de)
 			}
 
 			nextDir, _ = r.Seek(0, io.SeekCurrent) // get current position in file
@@ -201,7 +191,6 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 }
 
 // read 8 bit tiff image into a 1d slice
-// return (slice, imageWidth)
 func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
 	var data []uint8
 	for i, offset := range t.StripOffsets {
@@ -222,7 +211,6 @@ func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
 }
 
 // read 16 bit tiff image into a 1d slice
-// return (slice, imageWidth)
 func ReadData16(r io.ReadSeeker, h Header, t Tags) ([]uint16, error) {
 	var data []uint16
 	for i, offset := range t.StripOffsets {
@@ -243,7 +231,6 @@ func ReadData16(r io.ReadSeeker, h Header, t Tags) ([]uint16, error) {
 }
 
 // read 32 bit float tiff image into a 1d slice
-// return (slice, imageWidth)
 func ReadData32(r io.ReadSeeker, h Header, t Tags) ([]float32, error) {
 	var data []float32
 	for i, offset := range t.StripOffsets {
@@ -329,7 +316,7 @@ func getMultiTagValues16or32(r io.ReadSeeker, p *[]uint32, byteOrder binary.Byte
 	return nil
 }
 
-// contvert tiff numeric type to bytes
+// convert tiff numeric type to bytes
 func typeToBytes(t uint16) (uint16, error) {
 	// based on data type
 	// if <= 4 bytes read value, else follow pointer to value
