@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"reflect"
 )
 
 // parsed tiff header
@@ -204,8 +205,7 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 // read 8 bit tiff image into a 1d slice
 // return (slice, imageWidth)
 func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
-	numPixels := t.ImageWidth * t.ImageLength
-	data := make([]uint8, numPixels)
+	var data []uint8
 	for i, offset := range t.StripOffsets {
 		// seek r to offset
 		if _, err := r.Seek(int64(offset), 0); err != nil {
@@ -213,12 +213,54 @@ func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
 		}
 
 		// read into slice
-		vals := t.StripByteCounts[i] / (uint32(t.BitsPerSample) / 8)
-		start := uint32(i) * vals
-		end := start + vals
-		if err := binary.Read(r, h.ByteOrder, data[start:end]); err != nil {
+		numVals := t.StripByteCounts[i] / (uint32(t.BitsPerSample) / 8)
+		stripData := make([]uint8, numVals)
+		if err := binary.Read(r, h.ByteOrder, &stripData); err != nil {
 			return data, err
 		}
+		data = append(data, stripData...)
+	}
+	return data, nil
+}
+
+// read 16 bit tiff image into a 1d slice
+// return (slice, imageWidth)
+func ReadData16(r io.ReadSeeker, h Header, t Tags) ([]uint16, error) {
+	var data []uint16
+	for i, offset := range t.StripOffsets {
+		// seek r to offset
+		if _, err := r.Seek(int64(offset), 0); err != nil {
+			return data, err
+		}
+
+		// read into slice
+		numVals := t.StripByteCounts[i] / (uint32(t.BitsPerSample) / 8)
+		stripData := make([]uint16, numVals)
+		if err := binary.Read(r, h.ByteOrder, &stripData); err != nil {
+			return data, err
+		}
+		data = append(data, stripData...)
+	}
+	return data, nil
+}
+
+// read 32 bit float tiff image into a 1d slice
+// return (slice, imageWidth)
+func ReadData32(r io.ReadSeeker, h Header, t Tags) ([]float32, error) {
+	var data []float32
+	for i, offset := range t.StripOffsets {
+		// seek r to offset
+		if _, err := r.Seek(int64(offset), 0); err != nil {
+			return data, err
+		}
+
+		// read into slice
+		numVals := t.StripByteCounts[i] / (uint32(t.BitsPerSample) / 8)
+		stripData := make([]float32, numVals)
+		if err := binary.Read(r, h.ByteOrder, &stripData); err != nil {
+			return data, err
+		}
+		data = append(data, stripData...)
 	}
 	return data, nil
 }
@@ -312,13 +354,16 @@ func typeToBytes(t uint16) (uint16, error) {
 	return typeBytes, err
 }
 
+// just for development testing
+// factor out this whole file into packages
+// write something like this main as an integration test for each file type
 func main() {
+	// 8 bit /////////////////////////////////////////////////////////
 	// open tiff file
 	r, err := os.Open("cell8.tif")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer r.Close()
 
 	// read tags
 	tags, header, err := ReadTags(r)
@@ -326,14 +371,65 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(tags)
-
 	// read data
-	data, err := ReadData8(r, header, tags)
+	data8, err := ReadData8(r, header, tags)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(data[30360:])
-	println(len(data))
+	// close tiff file
+	r.Close()
+
+	expected8 := []uint8{117, 119, 118, 117, 118, 119, 119, 119, 118, 122}
+	println(reflect.DeepEqual(expected8, data8[30359:]))
+
+	// 16 bit ///////////////////////////////////////////////////////
+	// open tiff file
+	r, err = os.Open("cell16.tif")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// read tags
+	tags, header, err = ReadTags(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// read data
+	data16, err := ReadData16(r, header, tags)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// close tiff file
+	r.Close()
+
+	expected16 := []uint16{34492, 35354, 34923, 34492, 34923, 35354, 35354, 35354, 34923, 36648}
+	println(reflect.DeepEqual(expected16, data16[30359:]))
+
+	// 32 bit /////////////////////////////////////////////////////
+	// open tiff file
+	r, err = os.Open("cell32.tif")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// read tags
+	tags, header, err = ReadTags(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// read data
+	data32, err := ReadData32(r, header, tags)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// close tiff file
+	r.Close()
+
+	expected32 := []float32{0.48369575, 0.49456015, 0.48912793, 0.48369575, 0.48912793, 0.49456015, 0.49456015, 0.49456015, 0.48912793, 0.51087207}
+	println(reflect.DeepEqual(expected32, data32[30359:]))
 }
