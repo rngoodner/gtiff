@@ -98,12 +98,12 @@ func ReadHeader(r io.Reader) (Header, error) {
 }
 
 // read all tags in the tiff file and record the values of supported tags
-func ReadTags(r io.ReadSeeker) (Tags, error) {
+func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 	var tags Tags
 
 	header, err := ReadHeader(r)
 	if err != nil {
-		return tags, err
+		return tags, header, err
 	}
 
 	// TODO add loop for avery IFD
@@ -112,7 +112,7 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 	// offset to next IFD
 	nextIFD := header.IFDOffset
 	if _, err = r.Seek(int64(nextIFD), 0); err != nil {
-		return tags, err
+		return tags, header, err
 	}
 
 	for nextIFD != 0 {
@@ -120,7 +120,7 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 		var numDE uint16
 		err = binary.Read(r, header.ByteOrder, &numDE)
 		if err != nil {
-			return tags, err
+			return tags, header, err
 		}
 
 		//fmt.Printf("header: %v\n", header)
@@ -134,7 +134,7 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 			var de DirectoryEntry
 			err = binary.Read(r, header.ByteOrder, &de)
 			if err != nil {
-				return tags, err
+				return tags, header, err
 			}
 
 			//fmt.Printf("de%d: %v\n", i+1, de)
@@ -187,18 +187,40 @@ func ReadTags(r io.ReadSeeker) (Tags, error) {
 
 			// seek to next dir
 			if _, err = r.Seek(nextDir, 0); err != nil {
-				return tags, err
+				return tags, header, err
 			}
 		}
 
 		// get offset to next ifd
 		err = binary.Read(r, header.ByteOrder, &nextIFD)
 		if err != nil {
-			return tags, err
+			return tags, header, err
 		}
 	}
 
-	return tags, nil
+	return tags, header, nil
+}
+
+// read 8 bit tiff image into a 1d slice
+// return (slice, imageWidth)
+func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
+	numPixels := t.ImageWidth * t.ImageLength
+	data := make([]uint8, numPixels)
+	for i, offset := range t.StripOffsets {
+		// seek r to offset
+		if _, err := r.Seek(int64(offset), 0); err != nil {
+			return data, err
+		}
+
+		// read into slice
+		vals := t.StripByteCounts[i] / (uint32(t.BitsPerSample) / 8)
+		start := uint32(i) * vals
+		end := start + vals
+		if err := binary.Read(r, h.ByteOrder, data[start:end]); err != nil {
+			return data, err
+		}
+	}
+	return data, nil
 }
 
 // get value of a uint16 tag
@@ -292,14 +314,14 @@ func typeToBytes(t uint16) (uint16, error) {
 
 func main() {
 	// open tiff file
-	r, err := os.Open("cell32.tif")
+	r, err := os.Open("cell8.tif")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer r.Close()
 
 	// read tags
-	tags, err := ReadTags(r)
+	tags, header, err := ReadTags(r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -307,4 +329,11 @@ func main() {
 	fmt.Println(tags)
 
 	// read data
+	data, err := ReadData8(r, header, tags)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(data[30360:])
+	println(len(data))
 }
