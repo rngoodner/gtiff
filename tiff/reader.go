@@ -121,7 +121,7 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 
 		// for each data directory
 		var nextDir int64
-		for i := 0; i < int(numDE); i++ {
+		for i := uint16(0); i < numDE; i++ {
 			// read static parts of directory entry
 			var de DirectoryEntry
 			err = binary.Read(r, header.ByteOrder, &de)
@@ -303,7 +303,7 @@ func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, d
 func getMultiTagValues16or32(r io.ReadSeeker, p *[]uint32, byteOrder binary.ByteOrder, de DirectoryEntry) error {
 	var newVal uint32
 
-	for i := 0; i < int(de.Count); i++ {
+	for i := uint32(0); i < de.Count; i++ {
 		if err := getTagValue16or32(r, &newVal, byteOrder, de); err != nil {
 			return err
 		}
