@@ -8,14 +8,6 @@ import (
 	"os"
 )
 
-// structure of a Directory Entry
-type directoryEntry struct {
-	Tag         uint16 // tag id number
-	Type        uint16 // type of value
-	Count       uint32 // number of values
-	ValueOffset uint32 // offset to value
-}
-
 // reads the header of a Tiff file
 func ReadHeader(r io.Reader) (Header, error) {
 	var header Header
