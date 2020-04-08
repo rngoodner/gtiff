@@ -43,11 +43,3 @@ func (t Tags) String() string {
 	res += fmt.Sprintf("ResolutionUnit(296):            %v", t.ResolutionUnit)
 	return res
 }
-
-// structure of a Directory Entry
-type directoryEntry struct {
-	Tag         uint16 // tag id number
-	Type        uint16 // type of value
-	Count       uint32 // number of values
-	ValueOffset uint32 // offset to value
-}
