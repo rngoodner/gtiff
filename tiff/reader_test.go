@@ -1,7 +1,6 @@
 package tiff
 
 import (
-	"log"
 	"os"
 	"reflect"
 	"testing"
@@ -10,19 +9,19 @@ import (
 func TestReadIntegration8(t *testing.T) {
 	r, err := os.Open("../test-images/cell8.tif")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read tags
 	tags, header, err := ReadTags(r)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read data
 	data8, err := ReadData8(r, header, tags)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// close tiff file
@@ -37,19 +36,19 @@ func TestReadIntegration8(t *testing.T) {
 func TestReadIntegration16(t *testing.T) {
 	r, err := os.Open("../test-images/cell16.tif")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read tags
 	tags, header, err := ReadTags(r)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read data
 	data16, err := ReadData16(r, header, tags)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// close tiff file
@@ -64,19 +63,19 @@ func TestReadIntegration16(t *testing.T) {
 func TestReadIntegration32(t *testing.T) {
 	r, err := os.Open("../test-images/cell32.tif")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read tags
 	tags, header, err := ReadTags(r)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// read data
 	data32, err := ReadData32(r, header, tags)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// close tiff file
