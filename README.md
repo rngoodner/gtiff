@@ -1,5 +1,5 @@
-# grayscale-tiff
-grayscale-tiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images.
+# gtiff
+gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images.
 Per the TIFF 6.0 spec (https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf) grayscale images are 4 or 8 bit, but 16 and 32 bit images are still common in scientific and medical imaging.
 Although basic, this package provides functionality not found in other full-featured packages that strictly adhere to the spec.
 This package currently only supports the minimum tags required per the spec and does not offer much to manipulate them.
