@@ -26,6 +26,7 @@ type dir32 struct {
 	value uint32
 }
 
+// write a tiff from a slice of uint8 data
 func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
@@ -115,6 +116,7 @@ func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) err
 	return nil
 }
 
+// write a tiff from a slice of uint16 data
 func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
@@ -204,6 +206,7 @@ func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) e
 	return nil
 }
 
+// write a tiff from a slice of float32 data
 func WriteTiff32(w io.WriteSeeker, data []float32, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
