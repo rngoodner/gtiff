@@ -1,4 +1,5 @@
-package tiff
+// gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images
+package gtiff
 
 import (
 	"encoding/binary"

@@ -1,4 +1,4 @@
-package tiff
+package gtiff
 
 import (
 	"encoding/binary"

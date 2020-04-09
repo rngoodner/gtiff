@@ -1,4 +1,4 @@
-package tiff
+package gtiff
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestReadIntegration8(t *testing.T) {
-	r, err := os.Open("../test-images/cell8.tif")
+	r, err := os.Open("./test-images/cell8.tif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestReadIntegration8(t *testing.T) {
 }
 
 func TestReadIntegration16(t *testing.T) {
-	r, err := os.Open("../test-images/cell16.tif")
+	r, err := os.Open("./test-images/cell16.tif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestReadIntegration16(t *testing.T) {
 }
 
 func TestReadIntegration32(t *testing.T) {
-	r, err := os.Open("../test-images/cell32.tif")
+	r, err := os.Open("./test-images/cell32.tif")
 	if err != nil {
 		t.Fatal(err)
 	}

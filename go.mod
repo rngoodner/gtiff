@@ -1,3 +1,3 @@
-module github.com/ryn1x/grayscale-tiff
+module github.com/ryn1x/gtiff
 
 go 1.14

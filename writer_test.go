@@ -1,4 +1,4 @@
-package tiff
+package gtiff
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestWrite8(t *testing.T) {
-	fileName := "../test-images/test-output8.tif"
+	fileName := "./test-images/test-output8.tif"
 	w, err := os.Create(fileName)
 	if err != nil {
 		t.Fatalf("Could not open file: %v", fileName)
@@ -19,7 +19,7 @@ func TestWrite8(t *testing.T) {
 }
 
 func TestWrite16(t *testing.T) {
-	fileName := "../test-images/test-output16.tif"
+	fileName := "./test-images/test-output16.tif"
 	w, err := os.Create(fileName)
 	if err != nil {
 		t.Fatalf("Could not open file: %v", fileName)
@@ -32,7 +32,7 @@ func TestWrite16(t *testing.T) {
 }
 
 func TestWrite32(t *testing.T) {
-	fileName := "../test-images/test-output32.tif"
+	fileName := "./test-images/test-output32.tif"
 	w, err := os.Create(fileName)
 	if err != nil {
 		t.Fatalf("Could not open file: %v", fileName)

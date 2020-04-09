@@ -1,4 +1,4 @@
-package tiff
+package gtiff
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestReadWrite32(t *testing.T) {
-	r, err := os.Open("../test-images/cell32.tif")
+	r, err := os.Open("./test-images/cell32.tif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func TestReadWrite32(t *testing.T) {
 	}
 
 	// write back out data
-	fileName := "../test-images/test-output-cell32.tif"
+	fileName := "./test-images/test-output-cell32.tif"
 	w, err := os.Create(fileName)
 	if err != nil {
 		t.Fatalf("Could not open file: %v", fileName)

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/ryn1x/grayscale-tiff/tiff"
+	"github.com/ryn1x/gtiff"
 )
 
 func main() {
@@ -12,15 +12,15 @@ func main() {
 	defer r.Close()
 
 	// read tags
-	tags, header, _ := tiff.ReadTags(r) // error handling omitted
+	tags, header, _ := gtiff.ReadTags(r) // error handling omitted
 
 	// read data
-	data, _ := tiff.ReadData32(r, header, tags) // error handling omitted
+	data, _ := gtiff.ReadData32(r, header, tags) // error handling omitted
 
 	// >>> manipulate data as desired here <<<
 
-	// write out a new tiff
+	// write a new tiff
 	w, _ := os.Create("../test-images/sample-output-cell32.tif") // error handling omitted
 	defer w.Close()
-	tiff.WriteTiff32(w, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
+	gtiff.WriteTiff32(w, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
 }
