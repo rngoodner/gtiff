@@ -20,8 +20,7 @@ func main() {
 	// >>> manipulate data as desired here <<<
 
 	// write out a new tiff
-	fileName := "../test-images/sample-output-cell32.tif"
-	w, _ := os.Create(fileName) // error handling omitted
+	w, _ := os.Create("../test-images/sample-output-cell32.tif") // error handling omitted
 	defer w.Close()
 	tiff.WriteTiff32(w, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
 }
