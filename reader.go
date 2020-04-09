@@ -212,7 +212,7 @@ func ReadData32(r io.ReadSeeker, h Header, t Tags) ([]float32, error) {
 	return data, nil
 }
 
-// get value of a uint16 tag
+// get value of an uint16 tag
 func getTagValue16(r io.ReadSeeker, p *uint16, byteOrder binary.ByteOrder, de directoryEntry) error {
 	if _, err := r.Seek(int64(de.ValueOffset), 0); err != nil {
 		return err
@@ -225,7 +225,7 @@ func getTagValue16(r io.ReadSeeker, p *uint16, byteOrder binary.ByteOrder, de di
 	return nil
 }
 
-// get value of a uint32 tag
+// get value of an uint32 tag
 func getTagValue32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de directoryEntry) error {
 	if _, err := r.Seek(int64(de.ValueOffset), 0); err != nil {
 		return err
@@ -238,7 +238,7 @@ func getTagValue32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de di
 	return nil
 }
 
-// reads uint16 or uint32 value depending on type specified in directory entay and always return a uint32
+// reads uint16 or uint32 value depending on type specified in directory entry and always return a uint32
 func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, de directoryEntry) error {
 	var val16 uint16
 
