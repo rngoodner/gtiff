@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/ryn1x/gtiff?status.svg)](https://godoc.org/github.com/ryn1x/gtiff)
+
 # gtiff
 gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images.
 Per the TIFF 6.0 spec (https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf) grayscale images are 4 or 8 bit, but 16 and 32 bit images are still common in scientific and medical imaging.
