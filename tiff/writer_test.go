@@ -13,17 +13,15 @@ func TestWrite8(t *testing.T) {
 		log.Fatalf("Could not open file: %v", fileName)
 	}
 	defer w.Close()
-	WriteTiff8(w, data8, 5, 5)
-
-	res := false
-	if !res {
+	err = WriteTiff8(w, data8, 5, 5)
+	if err != nil {
 		t.Errorf("test failed")
 	}
 }
 
 var data8 = []uint8{
-	1, 0, 0, 0, 1,
-	0, 1, 0, 1, 0,
-	0, 0, 1, 0, 0,
-	0, 1, 0, 1, 0,
-	1, 0, 0, 0, 1}
+	255, 0, 0, 0, 255,
+	0, 255, 0, 255, 0,
+	0, 0, 255, 0, 0,
+	0, 255, 0, 255, 0,
+	255, 0, 0, 0, 255}

@@ -11,7 +11,7 @@ import (
 // structure of a Directory Entry
 type directoryEntry struct {
 	Tag         uint16 // tag id number
-	Type        uint16 // type of value
+	DType       uint16 // type of value
 	Count       uint32 // number of values
 	ValueOffset uint32 // offset to value
 }
@@ -91,7 +91,7 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 			}
 
 			// data type * number of values in bytes
-			typeBytes16, _ := typeToBytes(de.Type)
+			typeBytes16, _ := typeToBytes(de.DType)
 			typeBytes := uint32(typeBytes16)
 			typeBytes *= de.Count // bytes * number of values
 
@@ -246,7 +246,7 @@ func getTagValue16or32(r io.ReadSeeker, p *uint32, byteOrder binary.ByteOrder, d
 	}
 
 	var err error
-	switch de.Type {
+	switch de.DType {
 	case 3:
 		err = getTagValue16(r, &val16, byteOrder, de)
 		*p = uint32(val16)
@@ -270,7 +270,7 @@ func getMultiTagValues16or32(r io.ReadSeeker, p *[]uint32, byteOrder binary.Byte
 		}
 		*p = append(*p, newVal)
 
-		next, _ := typeToBytes(de.Type)
+		next, _ := typeToBytes(de.DType)
 		de.ValueOffset += uint32(next)
 	}
 
