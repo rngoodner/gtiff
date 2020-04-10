@@ -22,5 +22,5 @@ func main() {
 	// write a new tiff
 	w, _ := os.Create("../test-images/sample-output-cell32.tif") // error handling omitted
 	defer w.Close()
-	gtiff.WriteTiff32(w, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
+	gtiff.WriteTiff32(w, header.ByteOrder, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
 }

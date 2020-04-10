@@ -31,7 +31,7 @@ func TestReadWrite32(t *testing.T) {
 		t.Fatalf("Could not open file: %v", fileName)
 	}
 	defer w.Close()
-	err = WriteTiff32(w, data32, tags.ImageWidth, tags.ImageLength)
+	err = WriteTiff32(w, header.ByteOrder, data32, tags.ImageWidth, tags.ImageLength)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -27,7 +27,7 @@ type dir32 struct {
 }
 
 // write a tiff from a slice of uint8 data
-func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) error {
+func WriteTiff8(w io.WriteSeeker, byteOrder binary.ByteOrder, data []uint8, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
 	// 2) write 1 ifd of 11 directory entries
@@ -40,7 +40,7 @@ func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) err
 	if _, err := w.Seek(8, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, data); err != nil {
+	if err := binary.Write(w, byteOrder, data); err != nil {
 		return err
 	}
 	afterData, _ := w.Seek(0, io.SeekCurrent)
@@ -49,67 +49,71 @@ func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) err
 	w.Seek(afterData, 0)
 
 	// 2)
-	if err := binary.Write(w, binary.LittleEndian, uint16(11)); err != nil {
+	if err := binary.Write(w, byteOrder, uint16(11)); err != nil {
 		return err
 	}
 	// 3-4)
 	// ImageWidth
-	if err := binary.Write(w, binary.LittleEndian, newDir32(256, width)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(256, width)); err != nil {
 		return err
 	}
 	// ImageLength
-	if err := binary.Write(w, binary.LittleEndian, newDir32(257, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(257, length)); err != nil {
 		return err
 	}
 	// BitsPerSample
-	if err := binary.Write(w, binary.LittleEndian, newDir16(258, 8)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(258, 8)); err != nil {
 		return err
 	}
 	// Compression
-	if err := binary.Write(w, binary.LittleEndian, newDir16(259, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(259, 1)); err != nil {
 		return err
 	}
 	// PhotometricInterpretation
-	if err := binary.Write(w, binary.LittleEndian, newDir16(262, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(262, 1)); err != nil {
 		return err
 	}
 	// StripOffsets
-	if err := binary.Write(w, binary.LittleEndian, newDir32(273, 8)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(273, 8)); err != nil {
 		return err
 	}
 	// RowsPerStrip
-	if err := binary.Write(w, binary.LittleEndian, newDir32(278, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(278, length)); err != nil {
 		return err
 	}
 	// StripByteCounts
-	if err := binary.Write(w, binary.LittleEndian, newDir32(279, width*length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(279, width*length)); err != nil {
 		return err
 	}
 	// XResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(282, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(282, 0)); err != nil {
 		return err
 	}
 	// YResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(283, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(283, 0)); err != nil {
 		return err
 	}
 	// ResolutionUnit
-	if err := binary.Write(w, binary.LittleEndian, newDir16(296, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(296, 0)); err != nil {
 		return err
 	}
 
 	// 5)
-	if err := binary.Write(w, binary.LittleEndian, []byte{0, 0, 0, 0}); err != nil {
+	if err := binary.Write(w, byteOrder, []byte{0, 0, 0, 0}); err != nil {
 		return err
 	}
 
 	// 6)
+	var bo uint16 = 0X4949 // default to little endian
+	if byteOrder == binary.BigEndian {
+		bo = 0X4D4D // big endian code
+	}
 	// create header
-	h := header{0X4949, 42, uint32(afterData)}
+	h := header{bo, 42, uint32(afterData)}
 	if _, err := w.Seek(0, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, h); err != nil {
+	if err := binary.Write(w, byteOrder, h); err != nil {
 		return err
 	}
 
@@ -117,7 +121,7 @@ func WriteTiff8(w io.WriteSeeker, data []uint8, width uint32, length uint32) err
 }
 
 // write a tiff from a slice of uint16 data
-func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) error {
+func WriteTiff16(w io.WriteSeeker, byteOrder binary.ByteOrder, data []uint16, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
 	// 2) write 1 ifd of 11 directory entries
@@ -130,7 +134,7 @@ func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) e
 	if _, err := w.Seek(8, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, data); err != nil {
+	if err := binary.Write(w, byteOrder, data); err != nil {
 		return err
 	}
 	afterData, _ := w.Seek(0, io.SeekCurrent)
@@ -139,67 +143,71 @@ func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) e
 	w.Seek(afterData, 0)
 
 	// 2)
-	if err := binary.Write(w, binary.LittleEndian, uint16(11)); err != nil {
+	if err := binary.Write(w, byteOrder, uint16(11)); err != nil {
 		return err
 	}
 	// 3-4)
 	// ImageWidth
-	if err := binary.Write(w, binary.LittleEndian, newDir32(256, width)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(256, width)); err != nil {
 		return err
 	}
 	// ImageLength
-	if err := binary.Write(w, binary.LittleEndian, newDir32(257, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(257, length)); err != nil {
 		return err
 	}
 	// BitsPerSample
-	if err := binary.Write(w, binary.LittleEndian, newDir16(258, 16)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(258, 16)); err != nil {
 		return err
 	}
 	// Compression
-	if err := binary.Write(w, binary.LittleEndian, newDir16(259, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(259, 1)); err != nil {
 		return err
 	}
 	// PhotometricInterpretation
-	if err := binary.Write(w, binary.LittleEndian, newDir16(262, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(262, 1)); err != nil {
 		return err
 	}
 	// StripOffsets
-	if err := binary.Write(w, binary.LittleEndian, newDir32(273, 8)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(273, 8)); err != nil {
 		return err
 	}
 	// RowsPerStrip
-	if err := binary.Write(w, binary.LittleEndian, newDir32(278, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(278, length)); err != nil {
 		return err
 	}
 	// StripByteCounts
-	if err := binary.Write(w, binary.LittleEndian, newDir32(279, width*length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(279, width*length)); err != nil {
 		return err
 	}
 	// XResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(282, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(282, 0)); err != nil {
 		return err
 	}
 	// YResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(283, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(283, 0)); err != nil {
 		return err
 	}
 	// ResolutionUnit
-	if err := binary.Write(w, binary.LittleEndian, newDir16(296, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(296, 0)); err != nil {
 		return err
 	}
 
 	// 5)
-	if err := binary.Write(w, binary.LittleEndian, []byte{0, 0, 0, 0}); err != nil {
+	if err := binary.Write(w, byteOrder, []byte{0, 0, 0, 0}); err != nil {
 		return err
 	}
 
 	// 6)
+	var bo uint16 = 0X4949 // default to little endian
+	if byteOrder == binary.BigEndian {
+		bo = 0X4D4D // big endian code
+	}
 	// create header
-	h := header{0X4949, 42, uint32(afterData)}
+	h := header{bo, 42, uint32(afterData)}
 	if _, err := w.Seek(0, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, h); err != nil {
+	if err := binary.Write(w, byteOrder, h); err != nil {
 		return err
 	}
 
@@ -207,7 +215,7 @@ func WriteTiff16(w io.WriteSeeker, data []uint16, width uint32, length uint32) e
 }
 
 // write a tiff from a slice of float32 data
-func WriteTiff32(w io.WriteSeeker, data []float32, width uint32, length uint32) error {
+func WriteTiff32(w io.WriteSeeker, byteOrder binary.ByteOrder, data []float32, width uint32, length uint32) error {
 	// steps:
 	// 1) write all image data starting at offset 8, seek to next word boundry and save offset
 	// 2) write 1 ifd of 12 directory entries
@@ -220,7 +228,7 @@ func WriteTiff32(w io.WriteSeeker, data []float32, width uint32, length uint32) 
 	if _, err := w.Seek(8, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, data); err != nil {
+	if err := binary.Write(w, byteOrder, data); err != nil {
 		return err
 	}
 	afterData, _ := w.Seek(0, io.SeekCurrent)
@@ -229,71 +237,75 @@ func WriteTiff32(w io.WriteSeeker, data []float32, width uint32, length uint32) 
 	w.Seek(afterData, 0)
 
 	// 2)
-	if err := binary.Write(w, binary.LittleEndian, uint16(12)); err != nil {
+	if err := binary.Write(w, byteOrder, uint16(12)); err != nil {
 		return err
 	}
 	// 3-4)
 	// ImageWidth
-	if err := binary.Write(w, binary.LittleEndian, newDir32(256, width)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(256, width)); err != nil {
 		return err
 	}
 	// ImageLength
-	if err := binary.Write(w, binary.LittleEndian, newDir32(257, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(257, length)); err != nil {
 		return err
 	}
 	// BitsPerSample
-	if err := binary.Write(w, binary.LittleEndian, newDir16(258, 32)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(258, 32)); err != nil {
 		return err
 	}
 	// Compression
-	if err := binary.Write(w, binary.LittleEndian, newDir16(259, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(259, 1)); err != nil {
 		return err
 	}
 	// PhotometricInterpretation
-	if err := binary.Write(w, binary.LittleEndian, newDir16(262, 1)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(262, 1)); err != nil {
 		return err
 	}
 	// StripOffsets
-	if err := binary.Write(w, binary.LittleEndian, newDir32(273, 8)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(273, 8)); err != nil {
 		return err
 	}
 	// RowsPerStrip
-	if err := binary.Write(w, binary.LittleEndian, newDir32(278, length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(278, length)); err != nil {
 		return err
 	}
 	// StripByteCounts
-	if err := binary.Write(w, binary.LittleEndian, newDir32(279, width*length)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(279, width*length)); err != nil {
 		return err
 	}
 	// XResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(282, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(282, 0)); err != nil {
 		return err
 	}
 	// YResolution
-	if err := binary.Write(w, binary.LittleEndian, newDir32(283, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir32(283, 0)); err != nil {
 		return err
 	}
 	// ResolutionUnit
-	if err := binary.Write(w, binary.LittleEndian, newDir16(296, 0)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(296, 0)); err != nil {
 		return err
 	}
 	// SampleFormat (3 is IEEE floating point, default without tag is 1 uint)
-	if err := binary.Write(w, binary.LittleEndian, newDir16(339, 3)); err != nil {
+	if err := binary.Write(w, byteOrder, newDir16(339, 3)); err != nil {
 		return err
 	}
 
 	// 5)
-	if err := binary.Write(w, binary.LittleEndian, []byte{0, 0, 0, 0}); err != nil {
+	if err := binary.Write(w, byteOrder, []byte{0, 0, 0, 0}); err != nil {
 		return err
 	}
 
 	// 6)
+	var bo uint16 = 0X4949 // default to little endian
+	if byteOrder == binary.BigEndian {
+		bo = 0X4D4D // big endian code
+	}
 	// create header
-	h := header{0X4949, 42, uint32(afterData)}
+	h := header{bo, 42, uint32(afterData)}
 	if _, err := w.Seek(0, 0); err != nil {
 		return err
 	}
-	if err := binary.Write(w, binary.LittleEndian, h); err != nil {
+	if err := binary.Write(w, byteOrder, h); err != nil {
 		return err
 	}
 

@@ -1,6 +1,7 @@
 package gtiff
 
 import (
+	"encoding/binary"
 	"os"
 	"testing"
 )
@@ -12,7 +13,7 @@ func TestWrite8(t *testing.T) {
 		t.Fatalf("Could not open file: %v", fileName)
 	}
 	defer w.Close()
-	err = WriteTiff8(w, data8, 5, 5)
+	err = WriteTiff8(w, binary.LittleEndian, data8, 5, 5)
 	if err != nil {
 		t.Errorf("test failed")
 	}
@@ -25,7 +26,7 @@ func TestWrite16(t *testing.T) {
 		t.Fatalf("Could not open file: %v", fileName)
 	}
 	defer w.Close()
-	err = WriteTiff16(w, data16, 5, 5)
+	err = WriteTiff16(w, binary.LittleEndian, data16, 5, 5)
 	if err != nil {
 		t.Errorf("test failed")
 	}
@@ -38,7 +39,7 @@ func TestWrite32(t *testing.T) {
 		t.Fatalf("Could not open file: %v", fileName)
 	}
 	defer w.Close()
-	err = WriteTiff32(w, data32, 5, 5)
+	err = WriteTiff32(w, binary.BigEndian, data32, 5, 5)
 	if err != nil {
 		t.Errorf("test failed")
 	}
