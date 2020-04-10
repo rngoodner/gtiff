@@ -11,7 +11,7 @@ New and more advanced features will be added as I personally need them. Pull req
 The intended usage of this package is to read the data from a tiff image, manipulate the data as necessary, and write a new tiff image.
 
 Example (error handling omitted for brevity):
-```
+```go
 package main
 
 import (
