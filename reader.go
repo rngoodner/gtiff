@@ -1,4 +1,4 @@
-// gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images
+// Package gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images.
 package gtiff
 
 import (
@@ -17,7 +17,7 @@ type directoryEntry struct {
 	ValueOffset uint32 // offset to value
 }
 
-// reads the header of a Tiff file
+// ReadHeader reads the header of a Tiff file.
 func ReadHeader(r io.Reader) (Header, error) {
 	var header Header
 	header.ByteOrder = binary.BigEndian
@@ -58,7 +58,7 @@ func ReadHeader(r io.Reader) (Header, error) {
 	return header, nil
 }
 
-// read all tags in the tiff file and record the values of supported tags
+// ReadTags reads all tags in the tiff file and records the values of supported tags.
 func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 	var tags Tags
 
@@ -152,7 +152,7 @@ func ReadTags(r io.ReadSeeker) (Tags, Header, error) {
 	return tags, header, nil
 }
 
-// read 8 bit tiff image into a 1d slice
+// ReadData8 reads 8 bit tiff images into a 1d slice.
 func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
 	var data []uint8
 	for i, offset := range t.StripOffsets {
@@ -172,7 +172,7 @@ func ReadData8(r io.ReadSeeker, h Header, t Tags) ([]uint8, error) {
 	return data, nil
 }
 
-// read 16 bit tiff image into a 1d slice
+// ReadData16 reads 16 bit tiff image into a 1d slice.
 func ReadData16(r io.ReadSeeker, h Header, t Tags) ([]uint16, error) {
 	var data []uint16
 	for i, offset := range t.StripOffsets {
@@ -192,7 +192,7 @@ func ReadData16(r io.ReadSeeker, h Header, t Tags) ([]uint16, error) {
 	return data, nil
 }
 
-// read 32 bit float tiff image into a 1d slice
+// ReadData32 reads 32 bit float tiff image into a 1d slice.
 func ReadData32(r io.ReadSeeker, h Header, t Tags) ([]float32, error) {
 	var data []float32
 	for i, offset := range t.StripOffsets {

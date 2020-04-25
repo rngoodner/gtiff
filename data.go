@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-// parsed tiff header
+// Header represents a  parsed tiff header.
 type Header struct {
 	ByteOrder      binary.ByteOrder
 	TiffIdentifier uint16
 	IFDOffset      uint32
 }
 
-// minumum grayscale tag set per tiff 6.0 spec
+// Tags holds the minumum grayscale tag set per tiff 6.0 spec.
 type Tags struct {
 	ImageWidth                uint32   // 256 (short or long)
 	ImageLength               uint32   // 257 (short or long)
