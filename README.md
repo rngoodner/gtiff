@@ -34,7 +34,7 @@ func main() {
     // >>> manipulate data as desired here <<<
 
     // write a new tiff
-    w, _ := os.Create("../test-images/sample-output-cell32.tif") // error handling omitted
+    w, _ := os.Create("../test-images/example-output-cell32.tif") // error handling omitted
     defer w.Close()
     gtiff.WriteTiff32(w, header.ByteOrder, data, tags.ImageWidth, tags.ImageLength) // error handling omitted
 }
