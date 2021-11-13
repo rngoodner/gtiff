@@ -17,7 +17,7 @@ package main
 import (
     "os"
 
-    "github.com/ryn1x/gtiff"
+    "github.com/rngoodner/gtiff"
 )
 
 func main() {
