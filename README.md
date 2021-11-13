@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/ryn1x/gtiff?status.svg)](https://godoc.org/github.com/ryn1x/gtiff)
+[![GoDoc](https://godoc.org/github.com/rngoodner/gtiff?status.svg)](https://godoc.org/github.com/rngoodner/gtiff)
 
 # gtiff
 gtiff provides simple reading and writing of uint8, uint16, and float32 grayscale tiff images.
