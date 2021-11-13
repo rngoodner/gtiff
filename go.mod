@@ -1,3 +1,3 @@
-module github.com/ryn1x/gtiff
+module github.com/rngoodner/gtiff
 
 go 1.14
